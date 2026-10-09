@@ -3,11 +3,14 @@ import {
   BeforeUpdate,
   Column,
   Entity,
+  JoinColumn,
+  ManyToOne,
   OneToMany,
   PrimaryColumn,
   type Relation,
 } from 'typeorm';
 import { Reservation } from '../../reservations/entities/reservation.entity.js';
+import { Role } from '../../../roles/entities/role.entity.js';
 
 @Entity({ name: 'users' })
 export class User {
@@ -42,6 +45,10 @@ export class User {
 
   @Column({ name: 'deleted_at', type: 'datetime2', nullable: true })
   deletedAt: Date | null;
+
+  @ManyToOne(() => Role, (role) => role.users, { nullable: false })
+  @JoinColumn({ name: 'role_id' })
+  role: Relation<Role>;
 
   @OneToMany(() => Reservation, (reservation) => reservation.user)
   reservations: Relation<Reservation>;

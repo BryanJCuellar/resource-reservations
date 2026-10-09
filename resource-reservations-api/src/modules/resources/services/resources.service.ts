@@ -106,6 +106,10 @@ export class ResourcesService {
         throw new NotFoundException('Resource not found');
       }
 
+      if (!resource.isActive) {
+        throw new BadRequestException('Resource is not active');
+      }
+
       if (dto.name !== undefined) {
         resource.name = dto.name;
       }
