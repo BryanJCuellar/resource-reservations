@@ -1,11 +1,13 @@
 import {
   IsDateString,
+  IsEnum,
   IsNotEmpty,
   IsOptional,
   IsString,
   IsUUID,
 } from 'class-validator';
 import { Transform } from 'class-transformer';
+import { ReservationStatus } from '../enums/index.js';
 
 export class CreateReservationDto {
   @IsOptional()
@@ -20,6 +22,10 @@ export class CreateReservationDto {
   @IsNotEmpty()
   @IsDateString({ strict: true })
   endAt: string;
+
+  @IsOptional()
+  @IsEnum(ReservationStatus)
+  status?: ReservationStatus;
 
   @IsNotEmpty()
   @IsUUID()
