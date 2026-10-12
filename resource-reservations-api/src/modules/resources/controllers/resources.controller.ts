@@ -8,7 +8,6 @@ import {
   Patch,
   Post,
   Query,
-  UseGuards,
 } from '@nestjs/common';
 import { ResourcesService } from '../services/resources.service.js';
 import {
@@ -16,13 +15,15 @@ import {
   EditResourceDto,
   SearchResourcesByDto,
 } from '../dtos/index.js';
-import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard.js';
+import { Auth } from '../../auth/decorators/auth.decorator.js';
+import { UserRoles } from '../../roles/enums/index.js';
 
-@UseGuards(JwtAuthGuard)
+@Auth()
 @Controller('resources')
 export class ResourcesController {
   constructor(private readonly resourcesService: ResourcesService) {}
 
+  @Auth(UserRoles.ADMIN, UserRoles.STAFF)
   @Post()
   create(@Body() dto: CreateResourceDto) {
     return this.resourcesService.create(dto);
@@ -38,16 +39,19 @@ export class ResourcesController {
     return this.resourcesService.findOne(id);
   }
 
+  @Auth(UserRoles.ADMIN, UserRoles.STAFF)
   @Patch(':id')
   update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: EditResourceDto) {
     return this.resourcesService.update(id, dto);
   }
 
+  @Auth(UserRoles.ADMIN, UserRoles.STAFF)
   @Delete(':id')
   deactivate(@Param('id', ParseUUIDPipe) id: string) {
     return this.resourcesService.deactivate(id);
   }
 
+  @Auth(UserRoles.ADMIN, UserRoles.STAFF)
   @Patch(':id/reactivate')
   reactivate(@Param('id', ParseUUIDPipe) id: string) {
     return this.resourcesService.reactivate(id);

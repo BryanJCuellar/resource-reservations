@@ -5,6 +5,7 @@ import bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dtos/index.js';
 import { User } from '../users/entities/user.entity.js';
+import { JwtPayload } from './interfaces/index.js';
 
 @Injectable()
 export class AuthService {
@@ -32,10 +33,10 @@ export class AuthService {
     }
 
     if (!user.isActive) {
-      throw new UnauthorizedException('User is inactive');
+      throw new UnauthorizedException('User is not active');
     }
 
-    const payload = { sub: user.id, email: user.email };
+    const payload: JwtPayload = { sub: user.id, email: user.email };
 
     const accessToken = await this.jwtService.signAsync(payload);
 

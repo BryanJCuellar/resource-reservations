@@ -7,7 +7,7 @@ import {
   PrimaryColumn,
   type Relation,
 } from 'typeorm';
-import { User } from '../../modules/users/entities/user.entity.js';
+import { User } from '../../users/entities/user.entity.js';
 
 @Entity({ name: 'roles' })
 export class Role {
@@ -30,7 +30,7 @@ export class Role {
   deletedAt: Date | null;
 
   @OneToMany(() => User, (user) => user.role)
-  users: Relation<User>;
+  users: Relation<User[]>;
 
   @BeforeInsert()
   @BeforeUpdate()

@@ -7,7 +7,6 @@ import {
   Patch,
   Post,
   Query,
-  UseGuards,
 } from '@nestjs/common';
 import { ReservationsService } from '../services/reservations.service.js';
 import {
@@ -15,9 +14,9 @@ import {
   EditReservationDto,
   SearchReservationsByDto,
 } from '../dtos/index.js';
-import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard.js';
+import { Auth } from '../../auth/decorators/auth.decorator.js';
 
-@UseGuards(JwtAuthGuard)
+@Auth()
 @Controller('reservations')
 export class ReservationsController {
   constructor(private readonly reservationsService: ReservationsService) {}

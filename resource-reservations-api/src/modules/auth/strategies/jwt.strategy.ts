@@ -21,12 +21,15 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: JwtPayload): Promise<AuthenticatedUser> {
-    const user = await this.usersRepo.findOneBy({ id: payload.sub });
+    const user = await this.usersRepo.findOne({
+      where: { id: payload.sub },
+      relations: { role: true },
+    });
 
-    if (!user || !user.isActive) {
+    if (!user || !user.isActive || !user.role?.isActive) {
       throw new UnauthorizedException('Invalid authentication');
     }
 
-    return { id: user.id, email: user.email };
+    return { id: user.id, email: user.email, roleName: user.role.name };
   }
 }

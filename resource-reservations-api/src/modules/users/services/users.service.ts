@@ -7,7 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import bcrypt from 'bcrypt';
 import { User } from '../entities/user.entity.js';
-import { Role } from '../../../roles/entities/role.entity.js';
+import { Role } from '../../roles/entities/role.entity.js';
 import {
   CreateUserDto,
   EditProfileDto,
@@ -19,7 +19,7 @@ import { paginationValues } from '../../../common/consts/index.js';
 import { UserResponse } from '../interfaces/index.js';
 import { HttpErrorsExceptions } from '../../../common/exceptions/index.js';
 import { AuthenticatedUser } from '../../auth/interfaces/index.js';
-import { UserRoles } from '../../../roles/enums/index.js';
+import { UserRoles } from '../../roles/enums/index.js';
 
 @Injectable()
 export class UsersService {

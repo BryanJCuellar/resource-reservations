@@ -36,7 +36,7 @@ export class Resource {
   deletedAt: Date | null;
 
   @OneToMany(() => Reservation, (reservation) => reservation.resource)
-  reservations: Relation<Reservation>;
+  reservations: Relation<Reservation[]>;
 
   @BeforeInsert()
   @BeforeUpdate()

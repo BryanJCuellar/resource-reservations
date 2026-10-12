@@ -8,7 +8,6 @@ import {
   Patch,
   Post,
   Query,
-  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from '../services/users.service.js';
 import {
@@ -18,9 +17,10 @@ import {
   RegisterUserDto,
   SearchUsersByDto,
 } from '../dtos/index.js';
-import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard.js';
+import { Auth } from '../../auth/decorators/auth.decorator.js';
 import { CurrentUser } from '../../auth/decorators/current-user.decorator.js';
 import type { AuthenticatedUser } from '../../auth/interfaces/index.js';
+import { UserRoles } from '../../roles/enums/index.js';
 
 @Controller('users')
 export class UsersController {
@@ -31,13 +31,13 @@ export class UsersController {
     return this.usersService.register(dto);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @Auth()
   @Get('me')
   findMyProfile(@CurrentUser() authUser: AuthenticatedUser) {
     return this.usersService.findMyProfile(authUser);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @Auth()
   @Patch('me')
   updateMyProfile(
     @CurrentUser() authUser: AuthenticatedUser,
@@ -46,37 +46,37 @@ export class UsersController {
     return this.usersService.updateMyProfile(authUser, dto);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @Auth(UserRoles.ADMIN)
   @Post()
   create(@Body() dto: CreateUserDto) {
     return this.usersService.create(dto);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @Auth(UserRoles.ADMIN)
   @Get()
   findAll(@Query() dto: SearchUsersByDto) {
     return this.usersService.findAll(dto);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @Auth(UserRoles.ADMIN)
   @Get(':id')
   findOne(@Param('id', ParseUUIDPipe) id: string) {
     return this.usersService.findOne(id);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @Auth(UserRoles.ADMIN)
   @Patch(':id')
   update(@Param('id', ParseUUIDPipe) id: string, @Body() dto: EditUserDto) {
     return this.usersService.update(id, dto);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @Auth(UserRoles.ADMIN)
   @Delete(':id')
   deactivate(@Param('id', ParseUUIDPipe) id: string) {
     return this.usersService.deactivate(id);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @Auth(UserRoles.ADMIN)
   @Patch(':id/reactivate')
   reactivate(@Param('id', ParseUUIDPipe) id: string) {
     return this.usersService.reactivate(id);

@@ -10,7 +10,7 @@ import {
   type Relation,
 } from 'typeorm';
 import { Reservation } from '../../reservations/entities/reservation.entity.js';
-import { Role } from '../../../roles/entities/role.entity.js';
+import { Role } from '../../roles/entities/role.entity.js';
 
 @Entity({ name: 'users' })
 export class User {
@@ -51,7 +51,7 @@ export class User {
   role: Relation<Role>;
 
   @OneToMany(() => Reservation, (reservation) => reservation.user)
-  reservations: Relation<Reservation>;
+  reservations: Relation<Reservation[]>;
 
   @BeforeInsert()
   @BeforeUpdate()
