@@ -3,6 +3,7 @@ import { AuthModule } from './auth/auth.module.js';
 import { UsersModule } from './users/users.module.js';
 import { RolesModule } from './roles/roles.module.js';
 import { ResourcesModule } from './resources/resources.module.js';
+import { ResourceCategoriesModule } from './resource-categories/resource-categories.module.js';
 import { ReservationsModule } from './reservations/reservations.module.js';
 
 @Module({
@@ -11,6 +12,7 @@ import { ReservationsModule } from './reservations/reservations.module.js';
     UsersModule,
     RolesModule,
     ResourcesModule,
+    ResourceCategoriesModule,
     ReservationsModule,
   ],
 })

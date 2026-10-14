@@ -3,11 +3,14 @@ import {
   BeforeUpdate,
   Column,
   Entity,
+  JoinColumn,
+  ManyToOne,
   OneToMany,
   PrimaryColumn,
   type Relation,
 } from 'typeorm';
 import { Reservation } from '../../reservations/entities/reservation.entity.js';
+import { ResourceCategory } from '../../resource-categories/entities/resource-category.entity.js';
 
 @Entity({ name: 'resources' })
 export class Resource {
@@ -34,6 +37,10 @@ export class Resource {
 
   @Column({ name: 'deleted_at', type: 'datetime2', nullable: true })
   deletedAt: Date | null;
+
+  @ManyToOne(() => ResourceCategory, (rc) => rc.resources, { nullable: false })
+  @JoinColumn({ name: 'resource_category_id' })
+  resourceCategory: Relation<ResourceCategory>;
 
   @OneToMany(() => Reservation, (reservation) => reservation.resource)
   reservations: Relation<Reservation[]>;

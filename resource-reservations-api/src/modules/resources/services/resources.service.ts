@@ -13,17 +13,31 @@ import {
 } from '../dtos/index.js';
 import { HttpErrorsExceptions } from '../../../common/exceptions/index.js';
 import { paginationValues } from '../../../common/consts/index.js';
+import { ResourceCategory } from '../../resource-categories/entities/resource-category.entity.js';
 
 @Injectable()
 export class ResourcesService {
   constructor(
     @InjectRepository(Resource)
     private readonly resourcesRepository: Repository<Resource>,
+    @InjectRepository(ResourceCategory)
+    private readonly resourceCategoriesRepo: Repository<ResourceCategory>,
   ) {}
 
   async create(dto: CreateResourceDto): Promise<Resource> {
     try {
-      const resource = this.resourcesRepository.create(dto);
+      const { name, code, description, resourceCategoryId } = dto;
+
+      const resourceCategory =
+        await this.getActiveResourceCategory(resourceCategoryId);
+
+      const resource = this.resourcesRepository.create({
+        name,
+        code,
+        description,
+        resourceCategory,
+      });
+
       return await this.resourcesRepository.save(resource);
     } catch (error) {
       HttpErrorsExceptions.handleHttpException(
@@ -45,22 +59,24 @@ export class ResourcesService {
         limit = paginationValues.limit,
       } = dto;
 
-      const qb = this.resourcesRepository.createQueryBuilder('r');
+      const qb = this.resourcesRepository
+        .createQueryBuilder('resource')
+        .leftJoinAndSelect('resource.resourceCategory', 'resourceCategory');
 
       if (term) {
         qb.andWhere(
-          '(UPPER(r.name) LIKE UPPER(:term) OR UPPER(r.code) LIKE UPPER(:term))',
+          '(UPPER(resource.name) LIKE UPPER(:term) OR UPPER(resource.code) LIKE UPPER(:term))',
           { term: `%${term}%` },
         );
       }
 
       if (isActive) {
-        qb.andWhere('r.isActive = :isActive', {
+        qb.andWhere('resource.isActive = :isActive', {
           isActive: isActive === 'true',
         });
       }
 
-      qb.orderBy('r.createdAt', 'DESC');
+      qb.orderBy('resource.createdAt', 'DESC');
 
       const skip = (page - 1) * limit;
       qb.skip(skip);
@@ -79,7 +95,10 @@ export class ResourcesService {
 
   async findOne(id: string): Promise<Resource> {
     try {
-      const resource = await this.resourcesRepository.findOneBy({ id });
+      const resource = await this.resourcesRepository.findOne({
+        where: { id },
+        relations: { resourceCategory: true },
+      });
 
       if (!resource) {
         throw new NotFoundException('Resource not found');
@@ -122,6 +141,12 @@ export class ResourcesService {
         resource.description = dto.description;
       }
 
+      if (dto.resourceCategoryId !== undefined) {
+        resource.resourceCategory = await this.getActiveResourceCategory(
+          dto.resourceCategoryId,
+        );
+      }
+
       resource.updatedAt = new Date();
 
       return await this.resourcesRepository.save(resource);
@@ -142,7 +167,7 @@ export class ResourcesService {
       }
 
       if (!resource.isActive) {
-        throw new BadRequestException('Resource has been already deactivated');
+        throw new BadRequestException('Resource has already been deactivated');
       }
 
       return await this.resourcesRepository.save({
@@ -183,5 +208,23 @@ export class ResourcesService {
         'Error reactivating resource',
       );
     }
+  }
+
+  private async getActiveResourceCategory(
+    id: string,
+  ): Promise<ResourceCategory> {
+    const resourceCategory = await this.resourceCategoriesRepo.findOneBy({
+      id,
+    });
+
+    if (!resourceCategory) {
+      throw new NotFoundException('Resource category not found');
+    }
+
+    if (!resourceCategory.isActive) {
+      throw new BadRequestException('Resource requires an active category');
+    }
+
+    return resourceCategory;
   }
 }

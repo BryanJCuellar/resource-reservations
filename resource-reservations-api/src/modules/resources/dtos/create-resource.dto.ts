@@ -1,5 +1,5 @@
 import { Transform } from 'class-transformer';
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
 
 export class CreateResourceDto {
   @IsNotEmpty()
@@ -16,4 +16,8 @@ export class CreateResourceDto {
   @IsString()
   @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   description?: string;
+
+  @IsNotEmpty()
+  @IsUUID()
+  resourceCategoryId: string;
 }

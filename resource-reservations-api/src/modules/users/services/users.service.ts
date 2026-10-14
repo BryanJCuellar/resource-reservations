@@ -255,7 +255,7 @@ export class UsersService {
       }
 
       if (!user.isActive) {
-        throw new BadRequestException('User has been already deactivated');
+        throw new BadRequestException('User has already been deactivated');
       }
 
       const savedUser = await this.usersRepository.save({
