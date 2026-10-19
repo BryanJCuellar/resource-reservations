@@ -4,6 +4,7 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryColumn,
+  VersionColumn,
   type Relation,
 } from 'typeorm';
 import { ReservationStatus } from '../enums/index.js';
@@ -47,4 +48,11 @@ export class Reservation {
 
   @Column({ name: 'updated_at', type: 'datetime2', nullable: true })
   updatedAt: Date | null;
+
+  @ManyToOne(() => User, { nullable: false })
+  @JoinColumn({ name: 'created_by' })
+  createdBy: Relation<User>;
+
+  @VersionColumn()
+  version: number;
 }
