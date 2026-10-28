@@ -1,4 +1,4 @@
-import { Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { RolesService } from '../services/roles.service.js';
 import { CreateRoleDto } from '../dtos/create-role.dto.js';
 import { Auth } from '../../auth/decorators/auth.decorator.js';
@@ -11,7 +11,7 @@ export class RolesController {
 
   @Auth(UserRoles.ADMIN)
   @Post()
-  create(dto: CreateRoleDto) {
+  create(@Body() dto: CreateRoleDto) {
     return this.rolesService.create(dto);
   }
 }
