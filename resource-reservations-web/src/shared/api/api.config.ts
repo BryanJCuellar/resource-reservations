@@ -24,20 +24,16 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (res: AxiosResponse) => res,
   (error: AxiosError) => {
-    const status = error.response ? error.response.status : null;
-
+    const status = error.response?.status;
     const url = error.config?.url ?? "";
 
     if (status === 401) {
       const isLoginUrl = url.includes("/auth/login");
+
       if (!isLoginUrl) {
         localStorage.removeItem("reserv-access-t");
         window.location.href = "/auth/login";
       }
-    }
-
-    if (status === 403 && error.response?.data) {
-      return Promise.reject(error.response.data);
     }
 
     return Promise.reject(error);

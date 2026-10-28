@@ -1,4 +1,4 @@
-import axios from "axios";
+import { isAxiosError } from "axios";
 import { api } from "../../../shared/api/api.config";
 
 export const login = async (email: string, password: string) => {
@@ -9,7 +9,7 @@ export const login = async (email: string, password: string) => {
     });
     return data;
   } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
+    if (isAxiosError(error) && error.response) {
       throw new Error(error.response.data.message, { cause: error });
     }
     throw error;
