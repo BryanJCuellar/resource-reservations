@@ -5,17 +5,20 @@ import {
   IsOptional,
   IsString,
   IsUUID,
+  MaxLength,
 } from 'class-validator';
 
 export class CreateUserDto {
   @IsNotEmpty()
   @IsString()
   @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
+  @MaxLength(100)
   name: string;
 
   @IsNotEmpty()
   @IsEmail()
   @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
+  @MaxLength(254)
   email: string;
 
   @IsNotEmpty()
@@ -25,6 +28,7 @@ export class CreateUserDto {
   @IsOptional()
   @IsString()
   @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
+  @MaxLength(20)
   phone?: string;
 
   @IsNotEmpty()
