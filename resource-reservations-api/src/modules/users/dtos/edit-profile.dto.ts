@@ -4,6 +4,7 @@ import {
   IsOptional,
   IsString,
   MaxLength,
+  Matches,
   ValidateIf,
 } from 'class-validator';
 
@@ -19,5 +20,8 @@ export class EditProfileDto {
   @IsString()
   @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   @MaxLength(20)
+  @Matches(/^(?:|\+?(?=[0-9 ()-]*[0-9])[0-9 ()-]+)$/, {
+    message: 'Phone must contain digits and may include spaces, hyphens, parentheses and a leading +',
+  })
   phone?: string;
 }

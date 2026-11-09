@@ -1,4 +1,3 @@
-export interface LoginFormErrors {
-  email?: string | undefined;
-  password?: string | undefined;
-}
+export * from "./auth.inteface";
+export * from "./login.interface";
+export * from "./register.interface";

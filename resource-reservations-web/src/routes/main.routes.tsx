@@ -1,14 +1,14 @@
 import { Navigate, type RouteObject } from "react-router";
 import { AppLayout } from "../modules/AppLayout";
 import { HomePage } from "../modules/HomePage";
-import { ProtectedRoute } from "../modules/ProtectedRoute";
+import { ProtectedRoutes } from "./protected.routes";
 
 export const mainRoutes: RouteObject[] = [
   {
     element: (
-      <ProtectedRoute>
+      <ProtectedRoutes>
         <AppLayout />
-      </ProtectedRoute>
+      </ProtectedRoutes>
     ),
     children: [
       {

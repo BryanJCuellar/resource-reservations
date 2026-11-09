@@ -6,6 +6,8 @@ import {
   IsString,
   IsUUID,
   MaxLength,
+  Matches,
+  MinLength,
 } from 'class-validator';
 
 export class CreateUserDto {
@@ -23,12 +25,16 @@ export class CreateUserDto {
 
   @IsNotEmpty()
   @IsString()
+  @MinLength(8)
   password: string;
 
   @IsOptional()
   @IsString()
   @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   @MaxLength(20)
+  @Matches(/^(?:|\+?(?=[0-9 ()-]*[0-9])[0-9 ()-]+)$/, {
+    message: 'Phone must contain digits and may include spaces, hyphens, parentheses and a leading +',
+  })
   phone?: string;
 
   @IsNotEmpty()

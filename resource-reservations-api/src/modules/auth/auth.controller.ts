@@ -1,9 +1,9 @@
 import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service.js';
 import { LoginDto } from './dtos/index.js';
-import { JwtAuthGuard } from './guards/jwt-auth.guard.js';
 import { CurrentUser } from './decorators/current-user.decorator.js';
 import type { AuthenticatedUser } from './interfaces/index.js';
+import { Auth } from './decorators/auth.decorator.js';
 
 @Controller('auth')
 export class AuthController {
@@ -14,9 +14,9 @@ export class AuthController {
     return this.authService.login(dto);
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Get('profile')
-  getProfile(@CurrentUser() user: AuthenticatedUser) {
+  @Auth()
+  @Get('user')
+  getAuthUser(@CurrentUser() user: AuthenticatedUser) {
     return user;
   }
 }

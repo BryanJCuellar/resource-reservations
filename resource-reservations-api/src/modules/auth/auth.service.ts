@@ -5,7 +5,7 @@ import bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dtos/index.js';
 import { User } from '../users/entities/user.entity.js';
-import { JwtPayload } from './interfaces/index.js';
+import { AuthenticatedUser, JwtPayload } from './interfaces/index.js';
 
 @Injectable()
 export class AuthService {
@@ -18,6 +18,7 @@ export class AuthService {
   async login(dto: LoginDto) {
     const user = await this.usersRepo
       .createQueryBuilder('users')
+      .innerJoinAndSelect('users.role', 'role')
       .addSelect('users.passwordHash')
       .where('users.email = :email', { email: dto.email })
       .getOne();
@@ -32,14 +33,24 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    if (!user.isActive) {
-      throw new UnauthorizedException('User is not active');
+    if (!user.isActive || !user.role.isActive) {
+      throw new UnauthorizedException('Invalid authentication');
     }
 
     const payload: JwtPayload = { sub: user.id, email: user.email };
 
     const accessToken = await this.jwtService.signAsync(payload);
 
-    return { accessToken };
+    const authUser: AuthenticatedUser = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      roleName: user.role.name,
+    };
+
+    return {
+      accessToken,
+      user: authUser,
+    };
   }
 }

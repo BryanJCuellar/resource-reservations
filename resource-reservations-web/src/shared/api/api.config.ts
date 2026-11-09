@@ -3,6 +3,7 @@ import axios, {
   type AxiosResponse,
   type InternalAxiosRequestConfig,
 } from "axios";
+import { STORAGE_KEYS } from "../consts";
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
@@ -10,7 +11,7 @@ const api = axios.create({
 
 api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const accessToken = localStorage.getItem("reserv-access-t");
+    const accessToken = localStorage.getItem(STORAGE_KEYS.accessToken);
     if (accessToken) {
       config.headers["Authorization"] = `Bearer ${accessToken}`;
     }
@@ -31,7 +32,7 @@ api.interceptors.response.use(
       const isLoginUrl = url.includes("/auth/login");
 
       if (!isLoginUrl) {
-        localStorage.removeItem("reserv-access-t");
+        localStorage.removeItem(STORAGE_KEYS.accessToken);
         window.location.href = "/auth/login";
       }
     }

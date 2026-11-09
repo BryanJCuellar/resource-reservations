@@ -30,6 +30,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('Invalid authentication');
     }
 
-    return { id: user.id, email: user.email, roleName: user.role.name };
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      roleName: user.role.name,
+    };
   }
 }
