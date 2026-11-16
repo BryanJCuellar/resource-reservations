@@ -1,6 +1,6 @@
 import { Navigate, useRoutes, type RouteObject } from "react-router";
 import { authRoutes } from "../modules/auth/routes/auth.routes";
-import { mainRoutes } from "./main.routes";
+import { mainRoutes } from "../modules/routes/main.routes";
 import { NotFoundPage } from "../shared/pages/NotFoundPage";
 import { useAuth } from "../modules/auth/store/hooks/useAuth";
 import { useCallback, useEffect, useState } from "react";

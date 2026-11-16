@@ -78,8 +78,8 @@ export const RegisterPage = () => {
               Tu próxima reserva empieza aquí.
             </p>
             <p className="max-w-sm text-base leading-7 text-slate-600 dark:text-slate-300">
-              Crea tu cuenta para reservar recursos y gestionar tus
-              reservaciones.
+              Crea tu cuenta para solicitar espacios, vehículos y equipos de tu
+              empresa.
             </p>
           </div>
         </section>
@@ -171,7 +171,9 @@ export const RegisterPage = () => {
                       placeholder="Ej. ana@ejemplo.com"
                       autoComplete="username"
                       aria-invalid={!!errors.email}
-                      aria-describedby={errors.email ? "email-error" : undefined}
+                      aria-describedby={
+                        errors.email ? "email-error" : undefined
+                      }
                       {...register("email", {
                         required: "Ingresa tu correo",
                         pattern: {

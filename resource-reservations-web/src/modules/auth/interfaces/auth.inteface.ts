@@ -4,8 +4,3 @@ export interface AuthenticatedUser {
   email: string;
   roleName: string;
 }
-
-export interface LoginResponse {
-  accessToken: string;
-  user: AuthenticatedUser;
-}

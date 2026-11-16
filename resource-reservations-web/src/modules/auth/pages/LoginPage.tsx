@@ -9,13 +9,13 @@ export const LoginPage = () => {
     emailRef,
     passwordRef,
     email,
+    setEmail,
     password,
+    setPassword,
     loading,
     errors,
     showPwd,
     capsLockOn,
-    setEmail,
-    setPassword,
     handleShowPwd,
     handleCapsLock,
     handleSubmit,
@@ -76,8 +76,8 @@ export const LoginPage = () => {
               reservar.
             </p>
             <p className="max-w-sm text-base leading-7 text-slate-600 dark:text-slate-300">
-              Encuentra un recurso, elige tu horario y gestiona tus
-              reservaciones.
+              Solicita espacios, vehículos y equipos de tu empresa en el horario
+              que necesitas.
             </p>
           </div>
         </section>
