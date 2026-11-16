@@ -1,78 +1,70 @@
-# React + TypeScript + Vite
+# resource-reservations Web
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Overview
 
-Currently, two official plugins are available:
+The resource-reservations web application is built with React, TypeScript, and Vite. It connects to the API and provides authentication and navigation based on the signed-in user's role.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Prerequisites
 
-## React Compiler
+- Node.js 22.12 or later.
+- npm.
+- The [API](../resource-reservations-api/README.md) configured and available.
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+## Setup
 
-Note: This will impact Vite dev & build performances.
-You can also try [the experimental native React Compiler support in plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md#rust-react-compiler) by using `compiler: true` in the plugin options instead of using the Babel plugin.
+1. From the repository root, enter the web directory and install dependencies:
 
-## Expanding the ESLint configuration
+   ```powershell
+   cd resource-reservations-web
+   npm install
+   ```
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+2. Copy the environment example:
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+   ```powershell
+   Copy-Item .env.example .env
+   ```
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+   On macOS/Linux, use `cp .env.example .env` instead.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+3. Edit `.env` and set `VITE_API_URL` to the API's base URL, using the [environment example](.env.example) as the reference.
 
+## API Connection
+
+The frontend and API use separate environment files:
+
+| Variable | Location | Local example | Purpose |
+| --- | --- | --- | --- |
+| `VITE_API_URL` | Web `.env` | `http://localhost:3000` | API base URL used by the frontend. |
+| `CORS_ORIGIN` | API `.env` | `http://localhost:5173` | Frontend origin allowed to make browser requests to the API. |
+
+`CORS_ORIGIN` must match the frontend URL opened in the browser, including protocol, hostname, and port. The API accepts multiple origins separated by commas. Restart Vite after changing the web `.env`, and restart the API after changing its `.env`.
+
+Variables prefixed with `VITE_` are exposed to the browser. Do not put secrets in them.
+
+## Running
+
+```powershell
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+Open the URL shown in the terminal. Vite uses `http://localhost:5173` by default; if that port is occupied, it selects another port. Update the API's `CORS_ORIGIN` to match the actual frontend origin and restart the API.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Signing In
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+With both servers running, open `/auth/login` on the frontend URL. For local test accounts, follow the API's [Seed Data](../resource-reservations-api/README.md#seed-data) instructions.
 
-```
+The frontend stores the access token in `localStorage` and validates the session through the API when the page reloads. Navigation and protected pages depend on the signed-in user's role.
+
+## Development Commands
+
+Run these commands from the web directory:
+
+| Command | Purpose |
+| --- | --- |
+| `npm run dev` | Start the Vite development server. |
+| `npm run lint` | Check the project with ESLint. |
+| `npm run build` | Run the TypeScript build, then generate the frontend build in `dist/` with Vite. |
+| `npm run preview` | Serve the built frontend locally. Run `npm run build` first. |
+
+Preview still requires the API. Use the preview URL shown in the terminal and include its origin in the API's `CORS_ORIGIN`, then restart the API. Preview serves local build output; it does not deploy the application.
