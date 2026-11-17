@@ -113,6 +113,10 @@ export class ResourceCategoriesService {
         throw new NotFoundException('Resource category not found');
       }
 
+      if (!resourceCategory.isActive) {
+        throw new BadRequestException('Resource category is not active');
+      }
+
       if (dto.name !== undefined) {
         resourceCategory.name = dto.name;
       }
