@@ -55,6 +55,7 @@ export class ResourcesService {
       const {
         term,
         isActive,
+        resourceCategoryId,
         page = paginationValues.page,
         limit = paginationValues.limit,
       } = dto;
@@ -73,6 +74,12 @@ export class ResourcesService {
       if (isActive) {
         qb.andWhere('resource.isActive = :isActive', {
           isActive: isActive === 'true',
+        });
+      }
+
+      if (resourceCategoryId) {
+        qb.andWhere('resourceCategory.id = :resourceCategoryId', {
+          resourceCategoryId,
         });
       }
 
@@ -119,7 +126,10 @@ export class ResourcesService {
         throw new BadRequestException('No fields provided to update');
       }
 
-      const resource = await this.resourcesRepository.findOneBy({ id });
+      const resource = await this.resourcesRepository.findOne({
+        where: { id },
+        relations: { resourceCategory: true },
+      });
 
       if (!resource) {
         throw new NotFoundException('Resource not found');
@@ -141,7 +151,10 @@ export class ResourcesService {
         resource.description = dto.description;
       }
 
-      if (dto.resourceCategoryId !== undefined) {
+      if (
+        dto.resourceCategoryId !== undefined &&
+        dto.resourceCategoryId !== resource.resourceCategory.id
+      ) {
         resource.resourceCategory = await this.getActiveResourceCategory(
           dto.resourceCategoryId,
         );

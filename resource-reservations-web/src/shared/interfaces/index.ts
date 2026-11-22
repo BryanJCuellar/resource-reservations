@@ -12,3 +12,8 @@ export interface NavGroup {
   title: string;
   items: NavItem[];
 }
+
+export interface SelectOption {
+  label: string;
+  value: string;
+}

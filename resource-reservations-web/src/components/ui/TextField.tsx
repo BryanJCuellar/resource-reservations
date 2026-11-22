@@ -24,12 +24,14 @@ export function TextField({
 }: TextFieldComponentProps) {
   const generatedId = useId();
   const inputId = id ?? generatedId;
+  const labelId = `${inputId}-label`;
   const inputRef = useForkRef<HTMLInputElement | HTMLTextAreaElement>(ref, externalInputRef);
 
   return (
     <div className={`flex flex-col gap-2 ${fullWidth ? "w-full" : ""} ${className}`}>
       {label && (
         <label
+          id={labelId}
           htmlFor={inputId}
           className={`text-sm font-medium ${error ? "text-red-600 dark:text-red-300" : disabled ? "text-slate-400 dark:text-slate-500" : "text-blue-950 dark:text-slate-100"}`}
         >
@@ -48,6 +50,10 @@ export function TextField({
         inputRef={inputRef}
         slotProps={{
           ...slotProps,
+          select:
+            props.select && label
+              ? mergeSlotProps(slotProps?.select, { labelId })
+              : slotProps?.select,
           input: mergeSlotProps(slotProps?.input, {
             className: `rounded-md bg-white text-base text-blue-950 dark:bg-slate-800 dark:text-slate-100 [&_fieldset]:border-slate-300 hover:[&_fieldset]:border-slate-400 [&.Mui-focused_fieldset]:border-blue-700 dark:[&_fieldset]:border-slate-600 dark:hover:[&_fieldset]:border-slate-500 dark:[&.Mui-focused_fieldset]:border-blue-300 [&.Mui-error_fieldset]:border-red-600 [&.Mui-error.Mui-focused_fieldset]:border-red-600 [&.Mui-error:hover_fieldset]:border-red-600 dark:[&.Mui-error_fieldset]:border-red-300 dark:[&.Mui-error.Mui-focused_fieldset]:border-red-300 dark:[&.Mui-error:hover_fieldset]:border-red-300 [&.Mui-disabled]:bg-slate-100 dark:[&.Mui-disabled]:bg-slate-800 [&.Mui-disabled_fieldset]:border-slate-200 dark:[&.Mui-disabled_fieldset]:border-slate-700 ${multiline ? "" : size === "small" ? "h-11" : "h-12"}`,
           }),

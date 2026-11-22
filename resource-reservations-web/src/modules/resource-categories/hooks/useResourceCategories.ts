@@ -47,7 +47,7 @@ export const useResourceCategories = () => {
   const deactivateMutation = useDeactivateResourceCategoryMutation();
   const reactivateMutation = useReactivateResourceCategoryMutation();
 
-  const resourceCategories = resourceCategoriesQuery.data?.data;
+  const resourceCategories = resourceCategoriesQuery.data?.data ?? [];
   const totalItems = resourceCategoriesQuery.data?.count ?? 0;
 
   const rangeStart = totalItems === 0 ? 0 : (page - 1) * limit + 1;

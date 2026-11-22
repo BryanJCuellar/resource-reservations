@@ -65,7 +65,10 @@ export class UsersService {
 
   async findMyProfile(authUser: AuthenticatedUser): Promise<UserResponse> {
     try {
-      const user = await this.usersRepository.findOneBy({ id: authUser.id });
+      const user = await this.usersRepository.findOne({
+        where: { id: authUser.id },
+        relations: { role: true },
+      });
 
       if (!user) {
         throw new NotFoundException('User not found');
@@ -143,37 +146,45 @@ export class UsersService {
       const {
         term,
         isActive,
+        roleId,
         page = paginationValues.page,
         limit = paginationValues.limit,
       } = dto;
 
       const qb = this.usersRepository
-        .createQueryBuilder('users')
+        .createQueryBuilder('user')
+        .leftJoin('user.role', 'role')
         .select([
-          'users.id',
-          'users.name',
-          'users.email',
-          'users.phone',
-          'users.isActive',
-          'users.createdAt',
-          'users.updatedAt',
-          'users.deletedAt',
+          'user.id',
+          'user.name',
+          'user.email',
+          'user.phone',
+          'user.isActive',
+          'user.createdAt',
+          'user.updatedAt',
+          'user.deletedAt',
+          'role.id',
+          'role.name',
         ]);
 
       if (term) {
         qb.andWhere(
-          '(UPPER(users.name) LIKE UPPER(:term) OR UPPER(users.email) LIKE UPPER(:term))',
+          '(UPPER(user.name) LIKE UPPER(:term) OR UPPER(user.email) LIKE UPPER(:term))',
           { term: `%${term}%` },
         );
       }
 
       if (isActive) {
-        qb.andWhere('users.isActive = :isActive', {
+        qb.andWhere('user.isActive = :isActive', {
           isActive: isActive === 'true',
         });
       }
 
-      qb.orderBy('users.createdAt', 'DESC');
+      if (roleId) {
+        qb.andWhere('role.id = :roleId', { roleId });
+      }
+
+      qb.orderBy('user.createdAt', 'DESC');
 
       const skip = (page - 1) * limit;
       qb.skip(skip);
@@ -188,7 +199,10 @@ export class UsersService {
 
   async findOne(id: string): Promise<UserResponse> {
     try {
-      const user = await this.usersRepository.findOneBy({ id });
+      const user = await this.usersRepository.findOne({
+        where: { id },
+        relations: { role: true },
+      });
 
       if (!user) {
         throw new NotFoundException('User not found');
@@ -206,7 +220,10 @@ export class UsersService {
         throw new BadRequestException('No fields provided to update');
       }
 
-      const user = await this.usersRepository.findOneBy({ id });
+      const user = await this.usersRepository.findOne({
+        where: { id },
+        relations: { role: true },
+      });
 
       if (!user) {
         throw new NotFoundException('User not found');
@@ -224,16 +241,11 @@ export class UsersService {
         user.email = dto.email;
       }
 
-      if (dto.password !== undefined) {
-        const hash = await bcrypt.hash(dto.password, this.saltOrRounds);
-        user.passwordHash = hash;
-      }
-
       if (dto.phone !== undefined) {
         user.phone = dto.phone;
       }
 
-      if (dto.roleId !== undefined) {
+      if (dto.roleId !== undefined && dto.roleId !== user.role.id) {
         user.role = await this.getActiveRole(dto.roleId);
       }
 

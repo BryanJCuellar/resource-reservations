@@ -8,7 +8,7 @@ export interface UserResponse {
   createdAt: Date;
   updatedAt: Date | null;
   deletedAt: Date | null;
-  role: {
+  role?: {
     id: string;
     name: string;
   };

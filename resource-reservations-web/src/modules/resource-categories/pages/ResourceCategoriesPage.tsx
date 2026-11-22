@@ -1,5 +1,6 @@
 import {
   Archive,
+  ArchiveRestore,
   ChevronLeft,
   ChevronRight,
   CircleAlert,
@@ -10,24 +11,20 @@ import {
   X,
 } from "lucide-react";
 import { Button } from "../../../components/ui/Button";
+import { FilterSelect } from "../../../components/ui/FilterSelect";
 import { IconButton } from "../../../components/ui/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
-import MenuItem from "@mui/material/MenuItem";
-import Select from "@mui/material/Select";
 import Skeleton from "@mui/material/Skeleton";
+import { StatusBadge } from "../../../components/ui/StatusBadge";
 import { TextField } from "../../../components/ui/TextField";
+import {
+  ACTIVE_STATUS_OPTIONS,
+  PAGE_SIZE_OPTIONS,
+} from "../../../shared/consts";
 import { ResourceCategoryFormModal } from "../components/ResourceCategoryFormModal";
 import { ResourceCategoryViewModal } from "../components/ResourceCategoryViewModal";
 import { useResourceCategories } from "../hooks";
 import { ConfirmDialog } from "../../../components/ui/ConfirmDialog";
-
-const statusOptions = [
-  { label: "Todos los estados", value: "" },
-  { label: "Activo", value: "true" },
-  { label: "Inactivo", value: "false" },
-];
-
-const pageSizeOptions = [10, 25, 50];
 
 export const ResourceCategoriesPage = () => {
   const {
@@ -79,7 +76,10 @@ export const ResourceCategoriesPage = () => {
           </Button>
         </header>
 
-        <div className="flex flex-col gap-3 lg:grid lg:grid-cols-[minmax(0,1fr)_14rem_auto] lg:items-end">
+        <search
+          aria-label="Filtros de categorías"
+          className="flex flex-col gap-3 lg:grid lg:grid-cols-[minmax(0,1fr)_14rem_auto] lg:items-end"
+        >
           <div className="min-w-0 flex-1">
             <TextField
               id="category-search"
@@ -131,7 +131,7 @@ export const ResourceCategoriesPage = () => {
               id="category-status"
               labelId="category-status-label"
               value={searchResourceCategoriesBy.isActive ?? ""}
-              options={statusOptions}
+              options={ACTIVE_STATUS_OPTIONS}
               onChange={(value) => {
                 setSearchResourceCategoriesBy((prev) => ({
                   ...prev,
@@ -153,17 +153,12 @@ export const ResourceCategoriesPage = () => {
           >
             Limpiar filtros
           </Button>
-        </div>
+        </search>
 
         <div
           aria-busy={isPending}
           className="@container overflow-hidden rounded-lg border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800"
         >
-          {isPending && (
-            <span role="status" className="sr-only">
-              Cargando categorías
-            </span>
-          )}
           {isError ? (
             <div className="flex min-h-64 flex-col items-center justify-center gap-3 px-6 text-center">
               <CircleAlert
@@ -187,12 +182,23 @@ export const ResourceCategoriesPage = () => {
               </Button>
             </div>
           ) : isPending ? (
-            <SkeletonRows />
+            <>
+              <span role="status" className="sr-only">
+                Cargando categorías
+              </span>
+              <SkeletonRows />
+            </>
           ) : (
             <>
               {/* Desktop Table */}
-              <div className="scrollbar-custom hidden overflow-x-auto md:block">
+              <div
+                className="scrollbar-custom hidden overflow-x-auto focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-700 md:block dark:focus-visible:outline-blue-300"
+                tabIndex={0}
+                role="region"
+                aria-label="Tabla de categorías de recursos"
+              >
                 <table className="w-full min-w-180 table-fixed text-sm">
+                  <caption className="sr-only">Categorías de recursos</caption>
                   <colgroup>
                     <col className="w-[23%]" />
                     <col />
@@ -201,156 +207,171 @@ export const ResourceCategoriesPage = () => {
                   </colgroup>
                   <thead className="bg-slate-100 dark:bg-slate-900/60">
                     <tr className="border-b border-slate-200 dark:border-slate-700 hover:bg-transparent">
-                      <th className="text-left align-middle px-5 py-3 text-xs font-semibold text-slate-600 dark:text-slate-300">
-                        Nombre
-                      </th>
-                      <th className="text-left align-middle px-5 py-3 text-xs font-semibold text-slate-600 dark:text-slate-300">
-                        Descripción
-                      </th>
-                      <th className="text-left align-middle px-5 py-3 text-xs font-semibold text-slate-600 dark:text-slate-300">
-                        Estado
-                      </th>
-                      <th className="align-middle px-5 py-3 text-right text-xs font-semibold text-slate-600 dark:text-slate-300">
-                        Acciones
-                      </th>
+                      {["Nombre", "Descripción", "Estado", "Acciones"].map(
+                        (label) => (
+                          <th
+                            key={label}
+                            scope="col"
+                            className={`px-5 py-3 align-middle text-xs font-semibold text-slate-600 dark:text-slate-300 ${label === "Acciones" ? "text-right" : "text-left"}`}
+                          >
+                            {label}
+                          </th>
+                        ),
+                      )}
                     </tr>
                   </thead>
                   <tbody className="[&_tr:last-child]:border-0">
-                    {resourceCategories &&
-                      resourceCategories.map((category) => (
-                        <tr
-                          key={category.id}
-                          className="border-b border-slate-100 dark:border-slate-700/80"
-                        >
-                          <td className="align-middle px-5 py-4 font-medium text-blue-950 wrap-anywhere dark:text-slate-100">
-                            {category.name}
-                          </td>
-                          <td className="align-middle min-w-0 px-5 py-4">
-                            <p className="line-clamp-2 whitespace-normal text-sm leading-5 text-slate-600 wrap-anywhere dark:text-slate-300">
-                              {category.description || (
-                                <span className="italic text-slate-400">—</span>
-                              )}
-                            </p>
-                          </td>
-                          <td className="align-middle px-5 py-4">
-                            <StatusBadge
-                              active={category.isActive}
-                              label={category.isActive ? "Activo" : "Inactivo"}
-                            />
-                          </td>
-                          <td className="align-middle px-4 py-3">
-                            <div className="flex justify-end">
-                              <IconButton
-                                type="button"
-                                aria-label="Ver categoría"
-                                tooltip="Ver categoría"
-                                onClick={() =>
-                                  setCategoryModal({ mode: "view", category })
-                                }
-                              >
-                                <Eye aria-hidden="true" />
-                              </IconButton>
-                              <IconButton
-                                type="button"
-                                aria-label="Editar categoría"
-                                tooltip="Editar categoría"
-                                onClick={() =>
-                                  setCategoryModal({ mode: "edit", category })
-                                }
-                              >
-                                <Pencil aria-hidden="true" />
-                              </IconButton>
-                              <IconButton
-                                type="button"
-                                aria-label={
-                                  category.isActive
-                                    ? "Desactivar categoría"
-                                    : "Reactivar categoría"
-                                }
-                                tooltip={
-                                  category.isActive
-                                    ? "Desactivar categoría"
-                                    : "Reactivar categoría"
-                                }
-                                onClick={() =>
-                                  setCategoryModal({
-                                    mode: "changeStatus",
-                                    category,
-                                  })
-                                }
-                              >
+                    {resourceCategories.map((category) => (
+                      <tr
+                        key={category.id}
+                        className="border-b border-slate-100 dark:border-slate-700/80"
+                      >
+                        <td className="align-middle px-5 py-4 font-medium text-blue-950 wrap-anywhere dark:text-slate-100">
+                          {category.name}
+                        </td>
+                        <td className="align-middle min-w-0 px-5 py-4">
+                          <p className="line-clamp-2 whitespace-normal text-sm leading-5 text-slate-600 wrap-anywhere dark:text-slate-300">
+                            {category.description || (
+                              <span className="italic text-slate-400">—</span>
+                            )}
+                          </p>
+                        </td>
+                        <td className="align-middle px-5 py-4">
+                          <StatusBadge
+                            active={category.isActive}
+                            label={category.isActive ? "Activo" : "Inactivo"}
+                          />
+                        </td>
+                        <td className="align-middle px-4 py-3">
+                          <div className="flex justify-end">
+                            <IconButton
+                              type="button"
+                              aria-label={`Ver categoría ${category.name}`}
+                              tooltip="Ver categoría"
+                              onClick={() =>
+                                setCategoryModal({ mode: "view", category })
+                              }
+                            >
+                              <Eye aria-hidden="true" />
+                            </IconButton>
+                            <IconButton
+                              type="button"
+                              aria-label={`Editar categoría ${category.name}`}
+                              tooltip={
+                                category.isActive
+                                  ? "Editar categoría"
+                                  : "Reactiva la categoría para editarla"
+                              }
+                              disabled={!category.isActive}
+                              onClick={() =>
+                                setCategoryModal({ mode: "edit", category })
+                              }
+                            >
+                              <Pencil aria-hidden="true" />
+                            </IconButton>
+                            <IconButton
+                              type="button"
+                              aria-label={
+                                category.isActive
+                                  ? `Desactivar categoría ${category.name}`
+                                  : `Reactivar categoría ${category.name}`
+                              }
+                              tooltip={
+                                category.isActive
+                                  ? "Desactivar categoría"
+                                  : "Reactivar categoría"
+                              }
+                              onClick={() =>
+                                setCategoryModal({
+                                  mode: "changeStatus",
+                                  category,
+                                })
+                              }
+                            >
+                              {category.isActive ? (
                                 <Archive aria-hidden="true" />
-                              </IconButton>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
+                              ) : (
+                                <ArchiveRestore aria-hidden="true" />
+                              )}
+                            </IconButton>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
               </div>
 
               {/* Mobile Cards */}
               <div className="divide-y divide-slate-100 md:hidden dark:divide-slate-700">
-                {resourceCategories &&
-                  resourceCategories.map((category) => (
-                    <article key={category.id} className="space-y-3 p-4">
-                      <div className="flex items-start justify-between gap-3">
-                        <h2 className="font-medium text-blue-950 dark:text-slate-100">
-                          {category.name}
-                        </h2>
-                        <StatusBadge
-                          active={category.isActive}
-                          label={category.isActive ? "Activo" : "Inactivo"}
-                          showDot={false}
-                        />
-                      </div>
-                      <p className="line-clamp-2 text-sm leading-5 text-slate-600 dark:text-slate-300">
-                        {category.description || (
-                          <span className="italic text-slate-400">—</span>
-                        )}
-                      </p>
-                      <div className="flex justify-end border-t border-slate-100 pt-2 dark:border-slate-700">
-                        <IconButton
-                          type="button"
-                          aria-label="Ver categoría"
-                          tooltip="Ver categoría"
-                          onClick={() =>
-                            setCategoryModal({ mode: "view", category })
-                          }
-                        >
-                          <Eye aria-hidden="true" />
-                        </IconButton>
-                        <IconButton
-                          type="button"
-                          aria-label="Editar categoría"
-                          tooltip="Editar categoría"
-                          onClick={() =>
-                            setCategoryModal({ mode: "edit", category })
-                          }
-                        >
-                          <Pencil aria-hidden="true" />
-                        </IconButton>
-                        <IconButton
-                          type="button"
-                          aria-label={
-                            category.isActive
-                              ? "Desactivar categoría"
-                              : "Reactivar categoría"
-                          }
-                          tooltip={
-                            category.isActive
-                              ? "Desactivar categoría"
-                              : "Reactivar categoría"
-                          }
-                          onClick={() =>
-                            setCategoryModal({ mode: "changeStatus", category })
-                          }
-                        >
+                {resourceCategories.map((category) => (
+                  <article key={category.id} className="space-y-3 p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <h2 className="min-w-0 wrap-anywhere font-medium text-blue-950 dark:text-slate-100">
+                        {category.name}
+                      </h2>
+                      <StatusBadge
+                        active={category.isActive}
+                        label={category.isActive ? "Activo" : "Inactivo"}
+                        showDot={false}
+                      />
+                    </div>
+                    <p className="line-clamp-2 text-sm leading-5 text-slate-600 dark:text-slate-300">
+                      {category.description || (
+                        <span className="italic text-slate-400">—</span>
+                      )}
+                    </p>
+                    <div className="flex justify-end border-t border-slate-100 pt-2 dark:border-slate-700">
+                      <IconButton
+                        type="button"
+                        aria-label={`Ver categoría ${category.name}`}
+                        tooltip="Ver categoría"
+                        onClick={() =>
+                          setCategoryModal({ mode: "view", category })
+                        }
+                      >
+                        <Eye aria-hidden="true" />
+                      </IconButton>
+                      <IconButton
+                        type="button"
+                        aria-label={`Editar categoría ${category.name}`}
+                        tooltip={
+                          category.isActive
+                            ? "Editar categoría"
+                            : "Reactiva la categoría para editarla"
+                        }
+                        disabled={!category.isActive}
+                        onClick={() =>
+                          setCategoryModal({ mode: "edit", category })
+                        }
+                      >
+                        <Pencil aria-hidden="true" />
+                      </IconButton>
+                      <IconButton
+                        type="button"
+                        aria-label={
+                          category.isActive
+                            ? `Desactivar categoría ${category.name}`
+                            : `Reactivar categoría ${category.name}`
+                        }
+                        tooltip={
+                          category.isActive
+                            ? "Desactivar categoría"
+                            : "Reactivar categoría"
+                        }
+                        onClick={() =>
+                          setCategoryModal({ mode: "changeStatus", category })
+                        }
+                      >
+                        {category.isActive ? (
                           <Archive aria-hidden="true" />
-                        </IconButton>
-                      </div>
-                    </article>
-                  ))}
+                        ) : (
+                          <ArchiveRestore aria-hidden="true" />
+                        )}
+                      </IconButton>
+                    </div>
+                  </article>
+                ))}
               </div>
 
               {totalItems === 0 && (
@@ -394,7 +415,7 @@ export const ResourceCategoriesPage = () => {
                 </div>
               )}
 
-              {resourceCategories && resourceCategories.length > 0 && (
+              {resourceCategories.length > 0 && (
                 <footer className="grid grid-cols-1 items-center gap-3 border-t border-slate-200 px-4 py-3 text-sm text-slate-600 @[480px]:grid-cols-2 @[720px]:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] dark:border-slate-700 dark:text-slate-300">
                   <p className="text-center @[480px]:col-start-1 @[480px]:row-start-1 @[480px]:justify-self-start @[480px]:text-left @[720px]:col-start-1 @[720px]:row-start-1">
                     {rangeStart}–{rangeEnd} de {totalItems}{" "}
@@ -437,7 +458,7 @@ export const ResourceCategoriesPage = () => {
                       id="page-size"
                       labelId="page-size-label"
                       value={limit}
-                      options={pageSizeOptions.map((value) => ({
+                      options={PAGE_SIZE_OPTIONS.map((value) => ({
                         label: String(value),
                         value,
                       }))}
@@ -465,9 +486,7 @@ export const ResourceCategoriesPage = () => {
               ? `edit-${categoryModal.category.id}`
               : "create"
           }
-          open
           onClose={() => setCategoryModal(null)}
-          mode={categoryModal.mode}
           category={
             categoryModal.mode === "edit" ? categoryModal.category : undefined
           }
@@ -477,7 +496,6 @@ export const ResourceCategoriesPage = () => {
       )}
       {categoryModal?.mode === "view" && (
         <ResourceCategoryViewModal
-          open
           onClose={() => setCategoryModal(null)}
           category={categoryModal.category}
         />
@@ -504,83 +522,6 @@ export const ResourceCategoriesPage = () => {
   );
 };
 
-function StatusBadge({
-  active,
-  label,
-  showDot = true,
-}: {
-  active: boolean;
-  label: string;
-  showDot?: boolean;
-}) {
-  return (
-    <span
-      className={`inline-flex shrink-0 items-center rounded-md border px-2 py-0.5 text-xs font-medium ${
-        active
-          ? "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950/50 dark:text-emerald-300"
-          : "border-slate-300 bg-slate-100 text-slate-600 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-300"
-      }`}
-    >
-      {showDot && (
-        <span
-          aria-hidden="true"
-          className={`mr-1.5 size-1.5 rounded-full ${active ? "bg-emerald-600 dark:bg-emerald-400" : "bg-slate-400"}`}
-        />
-      )}
-      {label}
-    </span>
-  );
-}
-
-function FilterSelect<T extends string | number>({
-  id,
-  labelId,
-  value,
-  options,
-  onChange,
-  size = "medium",
-  className = "",
-}: {
-  id: string;
-  labelId: string;
-  value: T;
-  options: { value: T; label: string }[];
-  onChange: (value: T) => void;
-  size?: "small" | "medium";
-  className?: string;
-}) {
-  return (
-    <Select<T>
-      id={id}
-      labelId={labelId}
-      value={value}
-      displayEmpty
-      size="small"
-      onChange={(event) => {
-        const option = options.find(
-          (option) => String(option.value) === String(event.target.value),
-        );
-        if (option) onChange(option.value);
-      }}
-      className={`rounded-md bg-white text-blue-950 dark:bg-slate-800 dark:text-slate-100 [&_fieldset]:border-slate-300 hover:[&_fieldset]:border-slate-400 [&.Mui-focused_fieldset]:border-blue-700 dark:[&_fieldset]:border-slate-600 dark:hover:[&_fieldset]:border-slate-500 dark:[&.Mui-focused_fieldset]:border-blue-300 [&_svg]:text-slate-500 dark:[&_svg]:text-slate-400 ${size === "small" ? "h-9 text-sm" : "h-11 text-base"} ${className}`}
-      MenuProps={{
-        slotProps: {
-          paper: {
-            className:
-              "mt-1 rounded-md border border-slate-200 bg-white bg-none text-blue-950 shadow-sm dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100",
-          },
-        },
-      }}
-    >
-      {options.map((option) => (
-        <MenuItem key={option.value} value={option.value}>
-          {option.label}
-        </MenuItem>
-      ))}
-    </Select>
-  );
-}
-
 function SkeletonRows() {
   return (
     <>
@@ -597,18 +538,15 @@ function SkeletonRows() {
           </colgroup>
           <thead className="bg-slate-100 dark:bg-slate-900/60">
             <tr className="border-b border-slate-200 dark:border-slate-700">
-              <th className="px-5 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-300">
-                Nombre
-              </th>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-300">
-                Descripción
-              </th>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-300">
-                Estado
-              </th>
-              <th className="px-5 py-3 text-right text-xs font-semibold text-slate-600 dark:text-slate-300">
-                Acciones
-              </th>
+              {["Nombre", "Descripción", "Estado", "Acciones"].map((label) => (
+                <th
+                  key={label}
+                  scope="col"
+                  className={`px-5 py-3 align-middle text-xs font-semibold text-slate-600 dark:text-slate-300 ${label === "Acciones" ? "text-right" : "text-left"}`}
+                >
+                  {label}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>

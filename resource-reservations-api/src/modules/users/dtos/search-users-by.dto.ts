@@ -1,4 +1,4 @@
-import { IsIn, IsOptional, IsString } from 'class-validator';
+import { IsIn, IsOptional, IsString, IsUUID } from 'class-validator';
 import { PaginationDto } from '../../../common/dtos/index.js';
 import { Transform } from 'class-transformer';
 
@@ -11,4 +11,8 @@ export class SearchUsersByDto extends PaginationDto {
   @IsOptional()
   @IsIn(['true', 'false'])
   isActive?: string;
+
+  @IsOptional()
+  @IsUUID()
+  roleId?: string;
 }
